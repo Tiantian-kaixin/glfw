@@ -6,7 +6,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_library(OpenGL_LIBRARY OpenGL )
+find_library(OpenGL_LIBRARY OpenGL)
+add_definitions(${OPENGL_DEFINITIONS})
 if (APPLE AND NOT XCODE)
     set(PLATFORM_ABI x86_64)
     set(CMAKE_CXX_FLAGS "-ObjC++ -stdlib=libc++ ${cppFlags}")
@@ -46,11 +47,13 @@ if (APPLE)
 
     message( STATUS "METAL_PERFORMANCE_SHADERS_LIBRARY is ${METAL_PERFORMANCE_SHADERS_LIBRARY}")
 endif ()
+set(GLAD_GL "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps/glad/gl.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps/glad_gl.c")
 
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include)
+include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps)
 add_library(glfw_lib STATIC IMPORTED GLOBAL)
 set_target_properties(glfw_lib PROPERTIES IMPORTED_LOCATION
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/lib-x86_64/libglfw3.a)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp ${GLAD_GL})
 target_link_libraries(${PROJECT_NAME} glfw_lib ${OpenGL_LIBRARY} ${EXTRA_LIBS})
