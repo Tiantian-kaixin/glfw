@@ -50,10 +50,21 @@ endif ()
 set(GLAD_GL "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps/glad/gl.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps/glad_gl.c")
 
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps)
+include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/shader)
 add_library(glfw_lib STATIC IMPORTED GLOBAL)
 set_target_properties(glfw_lib PROPERTIES IMPORTED_LOCATION
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/lib-x86_64/libglfw3.a)
 
 add_executable(${PROJECT_NAME} main.cpp ${GLAD_GL})
 target_link_libraries(${PROJECT_NAME} glfw_lib ${OpenGL_LIBRARY} ${EXTRA_LIBS})
+
+add_custom_target(CopyResources ALL
+        COMMAND rm -rf ${CMAKE_CURRENT_BINARY_DIR}/Resources
+        COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/Resources
+        COMMAND echo compile finish
+        COMMAND cp -r asset ${CMAKE_CURRENT_BINARY_DIR}/Resources/
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/
+)
+add_dependencies(${PROJECT_NAME} CopyResources)

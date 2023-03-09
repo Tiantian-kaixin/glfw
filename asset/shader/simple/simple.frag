@@ -1,5 +1,5 @@
-#version 300 core
-
+#version 330 core
+out vec4 fragcolor;
 void main() {
-    gl_fragcolor = vec4(1);
+    fragcolor = vec4(1);
 }
