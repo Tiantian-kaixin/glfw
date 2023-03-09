@@ -52,7 +52,8 @@ set(GLAD_GL "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps/glad/gl.h"
 
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/deps
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/shader)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/shader
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/image)
 add_library(glfw_lib STATIC IMPORTED GLOBAL)
 set_target_properties(glfw_lib PROPERTIES IMPORTED_LOCATION
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/lib-x86_64/libglfw3.a)
