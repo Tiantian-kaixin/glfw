@@ -170,18 +170,25 @@ int main() {
 
         glm::vec3 lightPos(1.2f, 0.1f, 2.0f);
         glm::mat4 lightWorld(1.0f);
-        lightWorld = glm::rotate(lightWorld, glm::radians(-currentFrame * 60.f), glm::vec3(0.f, 1.f, 0.f));
+        float rad = glm::radians(-currentFrame * 60.f);
+        lightWorld = glm::rotate(lightWorld, glm::radians(-20.f), glm::vec3(0.f, 1.f, 0.f));
         lightPos = glm::vec3(lightWorld * glm::vec4(lightPos, 1.f));
         /*** box ***/
         glUseProgram(program);
         glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
-        glUniform3fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightColor));
-        glUniform3fv(glGetUniformLocation(program, "lightPos"), 1, glm::value_ptr(lightPos));
-        glUniform3fv(glGetUniformLocation(program, "objectColor"), 1, glm::value_ptr(objectColor));
+        glm::vec3 lightColor(1.f, 1.f, 1.f);
+        glUniform3fv(glGetUniformLocation(program, "light.position"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(program, "light.ambient"), 1, glm::value_ptr(lightColor * glm::vec3(1.f)));
+        glUniform3fv(glGetUniformLocation(program, "light.diffuse"), 1, glm::value_ptr(lightColor * glm::vec3(1.f)));
+        glUniform3fv(glGetUniformLocation(program, "light.specular"), 1, glm::value_ptr(glm::vec3(1.f)));
+        glm::vec3 materialColor(1.f, 1.f, 1.f);
+        glUniform1f(glGetUniformLocation(program, "material.shininess"), 32);
+        glUniform3fv(glGetUniformLocation(program, "material.ambient"), 1, glm::value_ptr(glm::vec3(0.0f, 0.1f, 0.06f)));
+        glUniform3fv(glGetUniformLocation(program, "material.diffuse"), 1, glm::value_ptr(glm::vec3(0.0f, 0.5f, 0.5f)));
+        glUniform3fv(glGetUniformLocation(program, "material.specular"), 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f)));
+
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
