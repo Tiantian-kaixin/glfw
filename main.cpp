@@ -92,23 +92,33 @@ int main() {
     glfwMakeContextCurrent(window);
     auto shader = new Shader("./Resources/asset/shader/light/light.vert", "./Resources/asset/shader/light/light.frag");
     auto program = shader->ID;
+
+    auto lightShader = new Shader("./Resources/asset/shader/simple/simple.vert", "./Resources/asset/shader/simple/simple.frag");
+    auto lightProgram = lightShader->ID;
     glEnable(GL_DEPTH_TEST);
-    unsigned int VAO, VBO, EBO;
+    unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-//    glGenBuffers(1, &EBO);
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    /*** light ***/
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER ,VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     /*** texture ***/
 //    int width, height, channal;
@@ -151,27 +161,36 @@ int main() {
         /* Render here */
         glClearColor( 0.4f, 0.3f, 0.4f, 0.0f );
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glUseProgram(program);
 //        glActiveTexture(GL_TEXTURE0);
 //        glBindTexture(GL_TEXTURE_2D, texture);
         glm::mat4 model(1.0f);
         glm::mat4 view(1.0f);
         view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+        /*** box ***/
+        glUseProgram(program);
         glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+        glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+        glUniform3fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightColor));
+        glUniform3fv(glGetUniformLocation(program, "lightPos"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(program, "objectColor"), 1, glm::value_ptr(objectColor));
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /*** light ***/
-        glm::vec4 lightColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-        glm::vec4 objectColor(1.0f, 0.5f, 0.31f, 1.0f);
-        glUniform4fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightColor));
-        glUniform4fv(glGetUniformLocation(program, "lightPos"), 1, glm::value_ptr(lightPos));
-        glUniform4fv(glGetUniformLocation(program, "objectColor"), 1, glm::value_ptr(objectColor));
-
-        /*** draw ***/
-        glBindVertexArray(VAO);
+        glUseProgram(lightProgram);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2, 0.2, 0.2f));
+        glUniformMatrix4fv(glGetUniformLocation(lightProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(lightProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(lightProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 //        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         /* Swap front and back buffers */
