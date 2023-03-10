@@ -168,13 +168,16 @@ int main() {
         view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+        glm::vec3 lightPos(1.2f, 0.1f, 2.0f);
+        glm::mat4 lightWorld(1.0f);
+        lightWorld = glm::rotate(lightWorld, glm::radians(-currentFrame * 60.f), glm::vec3(0.f, 1.f, 0.f));
+        lightPos = glm::vec3(lightWorld * glm::vec4(lightPos, 1.f));
         /*** box ***/
         glUseProgram(program);
         glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
         glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
         glUniform3fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightColor));
         glUniform3fv(glGetUniformLocation(program, "lightPos"), 1, glm::value_ptr(lightPos));
@@ -190,9 +193,9 @@ int main() {
         glUniformMatrix4fv(glGetUniformLocation(lightProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(lightProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(lightProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(lightProgram, "cameraPos"), 1, GL_FALSE, glm::value_ptr(camera.Position));
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
         /* Poll for and process events */

@@ -10,7 +10,7 @@ out vec3 aNorm;
 out vec4 aFragPos;
 
 void main() {
-    aFragPos = vec4(Pos, 1.f);
+    aFragPos = model * vec4(Pos, 1.f);
     gl_Position = projection * view * aFragPos;
     aNorm = Norm;
 }
