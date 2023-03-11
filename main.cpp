@@ -111,6 +111,10 @@ int main() {
     auto lightShader = new Shader("./Resources/asset/shader/simple/simple.vert", "./Resources/asset/shader/simple/simple.frag");
     auto lightProgram = lightShader->ID;
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     /*** box ***/
     unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
@@ -156,7 +160,7 @@ int main() {
         processInput(window);
         /* Render here */
         glClearColor( 0.4f, 0.3f, 0.4f, 0.0f );
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glm::mat4 model(1.0f);
         glm::mat4 view(1.0f);
         view = camera.GetViewMatrix();
@@ -190,11 +194,30 @@ int main() {
         glUniform3fv(glGetUniformLocation(program, "material.diffuse"), 1, glm::value_ptr(glm::vec3(0.0f, 0.5f, 0.5f)));
         glUniform3fv(glGetUniformLocation(program, "material.specular"), 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f)));
 
-        glBindVertexArray(VAO);
         for (auto p : cubePositions) {
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+            glStencilMask(0xFF);
+            glUseProgram(program);
+            model = glm::mat4(1.f);
             model = glm::translate(model, p);
             glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
+
+            /*** 轮廓 ***/
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            glStencilMask(0x00);
+            glDisable(GL_DEPTH_TEST);
+            glUseProgram(lightProgram);
+            model = glm::scale(model, glm::vec3(1.1f));
+            glUniformMatrix4fv(glGetUniformLocation(lightProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+            glUniformMatrix4fv(glGetUniformLocation(lightProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+            glUniformMatrix4fv(glGetUniformLocation(lightProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glBindVertexArray(vao);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glStencilFunc(GL_ALWAYS, 0, 0xFF);
+            glStencilMask(0xFF);
+            glEnable(GL_DEPTH_TEST);
         }
 
         /*** light ***/
