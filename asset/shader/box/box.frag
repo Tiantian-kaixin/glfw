@@ -1,6 +1,8 @@
 #version 330 core
 
 struct Light {
+    vec3 direction;
+    float cutOff;
     vec3 position;
     vec3 ambient;
     vec3 diffuse;
@@ -25,6 +27,10 @@ in vec4 aFragPos;
 in vec2 aTex;
 
 void main() {
+    if (dot(normalize(aNorm), normalize(light.position - aFragPos.xyz) ) < light.cutOff) {
+        FragColor = vec4(light.ambient * texture(material.textureSpecular, aTex).rgb, 1.0);
+        return;
+    }
     vec3 newNorm = texture(material.textureSpecular, aTex).xyz;
     vec3 ambient = light.ambient * texture(material.texture, aTex).xyz;
     vec3 diffuse = light.diffuse * texture(material.texture, aTex).xyz * max(dot(normalize(aNorm), normalize(light.position - aFragPos.xyz)), 0.f);

@@ -55,6 +55,19 @@ float vertices[] = {
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
 
+std::vector<glm::vec3> cubePositions = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  2.0f, -1.0f),
+        glm::vec3(-1.5f, -2.2f, -1.5f),
+        glm::vec3(-3.8f, -2.0f, -2.3f),
+        glm::vec3( 2.4f, -0.4f, -1.5f),
+        glm::vec3(-1.7f,  3.0f, -2.5f),
+        glm::vec3( 1.3f, -2.0f, -1.5f),
+        glm::vec3( 1.5f,  2.0f, -1.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+};
+
 const unsigned int indices[] = {  // note that we start from 0!
         0, 1, 3,  // first Triangle
         1, 2, 3   // second Triangle
@@ -149,10 +162,10 @@ int main() {
         view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-        glm::vec3 lightPos(1.2f, 0.1f, 2.0f);
+        glm::vec3 lightPos(1.2f, 0.1f, 4.0f);
         glm::mat4 lightWorld(1.0f);
-        float rad = glm::radians(-currentFrame * 60.f); // glm::radians(-20.f);
-        lightWorld = glm::rotate(lightWorld, rad, glm::vec3(0.f, 1.f, 0.f));
+        float rad =  glm::radians(-20.f); // glm::radians(-currentFrame * 60.f); //
+//        lightWorld = glm::rotate(lightWorld, rad, glm::vec3(0.f, 1.f, 0.f));
         lightPos = glm::vec3(lightWorld * glm::vec4(lightPos, 1.f));
         /*** box ***/
         glUseProgram(program);
@@ -162,8 +175,9 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, textureSpecular);
         glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glm::vec3 lightColor(1.f, 1.f, 1.f);
+        glUniform3fv(glGetUniformLocation(program, "light.direction"), 1, glm::value_ptr(glm::vec3(0.f, 0.f, -1.f)));
+        glUniform1f(glGetUniformLocation(program, "light.cutOff"), glm::cos(glm::radians(20.f)));
         glUniform3fv(glGetUniformLocation(program, "light.position"), 1, glm::value_ptr(lightPos));
         glUniform3fv(glGetUniformLocation(program, "light.ambient"), 1, glm::value_ptr(lightColor * glm::vec3(0.2f)));
         glUniform3fv(glGetUniformLocation(program, "light.diffuse"), 1, glm::value_ptr(lightColor * glm::vec3(0.5f)));
@@ -177,7 +191,11 @@ int main() {
         glUniform3fv(glGetUniformLocation(program, "material.specular"), 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f)));
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (auto p : cubePositions) {
+            model = glm::translate(model, p);
+            glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         /*** light ***/
         glUseProgram(lightProgram);
